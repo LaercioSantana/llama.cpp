@@ -1825,6 +1825,8 @@ bool server_prompt_cache::load(server_prompt & prompt, const server_tokens & tok
     if (it_best != states.end()) {
         SRV_TRC(" - found better prompt with f_keep = %.3f, f_sim = %.3f\n", f_keep_best, f_sim_best);
 
+        const bool consume = f_keep_best >= f_keep_clone_max;
+
         {
             auto & data = it_best->data.main;
 
@@ -1836,8 +1838,10 @@ bool server_prompt_cache::load(server_prompt & prompt, const server_tokens & tok
                 return false;
             }
 
-            data.clear();
-            data.shrink_to_fit();
+            if (consume) {
+                data.clear();
+                data.shrink_to_fit();
+            }
         }
 
         {
@@ -1854,14 +1858,21 @@ bool server_prompt_cache::load(server_prompt & prompt, const server_tokens & tok
                     return false;
                 }
 
-                data.clear();
-                data.shrink_to_fit();
+                if (consume) {
+                    data.clear();
+                    data.shrink_to_fit();
+                }
             }
         }
 
-        prompt = std::move(it_best->prompt);
+        if (consume) {
+            prompt = std::move(it_best->prompt);
 
-        states.erase(it_best);
+            states.erase(it_best);
+        } else {
+            // keep the entry in the cache; its state was copied into the slot above
+            prompt = it_best->prompt.clone();
+        }
     }
 
     return true;

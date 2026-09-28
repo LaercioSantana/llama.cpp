@@ -610,9 +610,10 @@ struct server_prompt_cache_state {
 };
 
 struct server_prompt_cache {
-    server_prompt_cache(int32_t limit_size_mib, size_t limit_tokens) {
+    server_prompt_cache(int32_t limit_size_mib, size_t limit_tokens, float f_keep_clone_max) {
         this->limit_size   = 1024ull*1024ull*(limit_size_mib < 0 ? 0 : limit_size_mib);
         this->limit_tokens = limit_tokens;
+        this->f_keep_clone_max = f_keep_clone_max;
     }
 
     std::list<server_prompt_cache_state> states;
@@ -622,6 +623,9 @@ struct server_prompt_cache {
 
     // in tokens, 0 = no limit
     size_t limit_tokens = 0;
+
+    // max f_keep for which a loaded entry is cloned and kept in the cache
+    float f_keep_clone_max = 0.0f;
 
     size_t size() const;
 

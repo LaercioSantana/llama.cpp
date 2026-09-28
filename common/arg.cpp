@@ -3797,6 +3797,13 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
         }
     ).set_examples({LLAMA_EXAMPLE_SERVER}));
     add_opt(common_arg(
+        {"--cache-clone-keep-max"}, "MAX",
+        string_format("when a cached prompt is loaded into a slot, keep a clone of it in the prompt cache if its f_keep is below this value, otherwise consume it (default: %.2f, 0.0 = disabled)\n", params.cache_clone_keep_max),
+        [](common_params & params, const std::string & value) {
+            params.cache_clone_keep_max = std::stof(value);
+        }
+    ).set_examples({LLAMA_EXAMPLE_SERVER}));
+    add_opt(common_arg(
         {"--lora-init-without-apply"},
         string_format("load LoRA adapters without applying them (apply later via POST /lora-adapters) (default: %s)", params.lora_init_without_apply ? "enabled" : "disabled"),
         [](common_params & params) {
